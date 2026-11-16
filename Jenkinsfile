@@ -20,7 +20,11 @@ pipeline {
                       -e MARIADB_PASSWORD=letmeinplz \
                       mariadb:11
 
-                    until docker exec todoappdb mariadb-admin ping -h localhost -uroot -psekrit --silent; do echo "Wachten op MariaDB..."; sleep 2; done
+                    until docker exec todoappdb mariadb-admin ping -h localhost -utodo_usr -pletmeinplz --silent; do
+                        echo "Wachten op MariaDB..."
+                        sleep 2
+                    done
+
                     docker exec -i todoappdb mariadb -utodo_usr -pletmeinplz todo_db < TodoApp/schema.sql
 
                     docker build -t todoapp ./TodoApp
