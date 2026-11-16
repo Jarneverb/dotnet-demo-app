@@ -20,7 +20,7 @@ pipeline {
                       -e MARIADB_PASSWORD=letmeinplz \
                       mariadb:11
 
-                    until docker exec todoappdb mariadb-admin ping -h localhost -utodo_usr -pletmeinplz --silent; do
+                    until docker exec todoappdb mariadb -utodo_usr -pletmeinplz -e "SELECT 1;" >/dev/null 2>&1; do
                         echo "Wachten op MariaDB..."
                         sleep 2
                     done
