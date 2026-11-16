@@ -41,5 +41,21 @@ pipeline {
                 sh 'curl -f http://172.17.0.1:5000/'
             }
         }
+
+        stage('Deploy Production') {
+            steps {
+                sshagent(['dmz010-deploy-key']) {
+                    sh '''
+                        docker save todoapp | ssh -o StrictHostKeyChecking=no deploy@192.0.2.10 'docker load'
+                        ssh -o StrictHostKeyChecking=no deploy@192.0.2.10 '
+                            docker rm -f todoapp-prod || true
+                            docker run -d --name todoapp-prod --restart unless-stopped -p 8080:8080 \
+                              -e ConnectionStrings__TodoDb="Server=192.0.2.20;Port=3306;Database=todo_db;User=todo_usr;Password=letmeinplz;" \
+                              todoapp
+                        '
+                    '''
+                }
+            }
+        }
     }
 }
