@@ -46,13 +46,17 @@ pipeline {
             steps {
                 sshagent(['dmz010-deploy-key']) {
                     sh '''
-                        docker save todoapp | gzip | ssh -o StrictHostKeyChecking=no -o BatchMode=yes -o ServerAliveInterval=5 -o ServerAliveCountMax=3 deploy@192.0.2.10 'gunzip | docker load'
+                        docker save todoapp | gzip > /tmp/todoapp.tar.gz
+                        scp -o StrictHostKeyChecking=no -o BatchMode=yes -o ConnectTimeout=10 /tmp/todoapp.tar.gz deploy@192.0.2.10:/tmp/todoapp.tar.gz
                         ssh -o StrictHostKeyChecking=no -o BatchMode=yes deploy@192.0.2.10 '
+                            gunzip -c /tmp/todoapp.tar.gz | docker load
+                            rm -f /tmp/todoapp.tar.gz
                             docker rm -f todoapp-prod || true
                             docker run -d --name todoapp-prod --restart unless-stopped -p 8080:8080 \
                               -e ConnectionStrings__TodoDb="Server=192.0.2.20;Port=3306;Database=todo_db;User=todo_usr;Password=letmeinplz;" \
                               todoapp
                         '
+                        rm -f /tmp/todoapp.tar.gz
                     '''
                 }
             }
