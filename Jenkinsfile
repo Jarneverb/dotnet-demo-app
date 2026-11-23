@@ -61,9 +61,9 @@ pipeline {
             }
         }
         post {
-        always {
-            sh 'docker rm -f todoapp todoappdb || true'
-            sh 'docker network rm todo-net || true'
+            always {
+                sh 'docker rm -f todoapp todoappdb || true'
+                sh 'docker network rm todo-net || true'
         }
     }
 }
